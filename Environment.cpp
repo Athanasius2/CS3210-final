@@ -12,7 +12,7 @@ Environment::Environment()
 {
 	//TODO: better error handling
 	read_species("species.txt");
-	read_map("map.txt");
+	//read_map("map.txt");
 	
 	
 }
@@ -21,7 +21,7 @@ Environment::Environment(std::string m, std::string s)
 {
 	//TODO: better error handling
 	read_species(s);
-	read_map(m);
+	//read_map(m);
 	
 	
 }
@@ -43,14 +43,14 @@ void Environment::read_species(std::string sp_list)
 			if (sp == "") continue;
 			else species.push_back(sp);
 		}
-		while(!sfile.eof());
+		while(!sfile.eof());//Is end-of-file bit set?
 	}
 	else
 	{
 		throw std::runtime_error("Species file not found!");
 	}
 	//TODO: else
-}
+}//TODO: I get a segmentation fault when function returns
 
 //TODO: make sure input is valid
 void Environment::read_map(std::string map_file)
