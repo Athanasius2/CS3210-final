@@ -37,7 +37,7 @@ void Environment::read_species(std::string sp_list)
 		do
 		{
 			size_t n = 100; //TODO: find better way to manage input size
-			char * s;
+			char * s = (char*) malloc(n);
 			sfile.getline(s, n);
 			std::string sp = s;
 			if (sp == "") continue;
@@ -59,7 +59,7 @@ void Environment::read_map(std::string map_file)
 	if (mfile)
 	{
 		size_t n = 500;	//TODO: manage buffer size better
-		char * s;
+		char * s = (char *) malloc(n);
 		do
 		{
 			std::string line;

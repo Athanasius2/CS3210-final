@@ -3,6 +3,8 @@
 #include <cstring>
 #include "Environment.hpp"
 
+#pragma warning(disable : 4996)
+
 void print_help()	//prints list of possible commands
 {
 	std::cout 	<< "help 		- displays commands" << std::endl

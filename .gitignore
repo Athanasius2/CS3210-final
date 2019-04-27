@@ -1,0 +1,12 @@
+
+*.vcxproj
+*.filters
+*.user
+*.tlog
+*.obj
+*.pch
+Debug/CS3210-final.log
+*.idb
+*.pdb
+pch.cpp
+pch.h
