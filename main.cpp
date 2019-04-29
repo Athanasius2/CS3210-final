@@ -1,9 +1,13 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <ctype.h>
+#include <memory>
 #include "Environment.hpp"
+#include "Actor.hpp"
 
 #pragma warning(disable : 4996)
+using namespace cppfinal;
 
 void print_help()	//prints list of possible commands
 {
@@ -17,11 +21,11 @@ void print_help()	//prints list of possible commands
 				<< "quit		- quits" << std::endl;
 }
 
-bool parse_command(std::string input, Environment *env)
+bool parse_command(std::string input, std::shared_ptr<Environment> env)
 {
-	char *in = (char*) malloc(sizeof(input.c_str()));
+	char *in = (char*) malloc(sizeof(input.c_str())); //TODO: fix this, it causes weird bugs
 	memcpy(in, input.c_str(), input.length());
-	std::string cmd = std::strtok(in, " ");
+	std::string cmd = std::strtok(in, " ");	//TODO: strtok is bad
 	
 	if(cmd == "help")
 	{
@@ -39,9 +43,10 @@ bool parse_command(std::string input, Environment *env)
 		std::string sfile = std::strtok(NULL, " ");
 		if (!mfile.empty() && !sfile.empty())
 		{
-			env = new Environment(mfile, sfile);
+			env = Environment::init(mfile, sfile);
 		}
-		else env = new Environment();
+		else env = Environment::init();
+		std::cout << env->to_string();
 		return true;
 	}
 	else if (cmd == "run")
@@ -53,6 +58,7 @@ bool parse_command(std::string input, Environment *env)
 			env->step(batch);
 		}
 		else env->step(1);
+		std::cout << env->to_string();
 		return true;
 
 	}
@@ -64,12 +70,13 @@ int main()
 {
 	std::string input = "";
 	print_help();
-	Environment *env = new Environment();
+	auto env = Environment::init();
 	
 	while (input != "quit")	//main input loop
 	{
-		std::cout << std::endl << ">> ";
+		std::cout << ">> ";
 		std::getline(std::cin, input);
+		input += " "; //solves strange strtok behavior
 		if(!parse_command(input, env))
 			std::cout << "\"" << input << "\"" << " not a valid command" << std::endl; 
 	}
