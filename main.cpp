@@ -1,13 +1,29 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <ctype.h>
 #include <memory>
+#include <regex>
+
 #include "Environment.hpp"
 #include "Actor.hpp"
 
 #pragma warning(disable : 4996)
 using namespace cppfinal;
+
+/*
+GENERAL TODO LIST: retrospective analysis of my code if I choose to clean it up in the future
+	-std::pair<int, int> should probably be either wrapped or replaced by an actual Position class
+	-put enum Direction in Position class
+	
+	-use typdef for std::shared_ptr<Actor>
+
+
+
+
+
+*/
 
 void print_help()	//prints list of possible commands
 {
@@ -23,46 +39,96 @@ void print_help()	//prints list of possible commands
 
 bool parse_command(std::string input, std::shared_ptr<Environment> env)
 {
-	char *in = (char*) malloc(sizeof(input.c_str())); //TODO: fix this, it causes weird bugs
-	memcpy(in, input.c_str(), input.length());
-	std::string cmd = std::strtok(in, " ");	//TODO: strtok is bad
-	
-	if(cmd == "help")
+	try
 	{
-		print_help();
-		return true;
-	}
-	else if (cmd == "quit")
-	{
-		exit(0);
-		return true;
-	}
-	else if (cmd == "load")
-	{
-		std::string mfile = std::strtok(NULL, " ");
-		std::string sfile = std::strtok(NULL, " ");
-		if (!mfile.empty() && !sfile.empty())
+		std::regex command("\\s*(help|quit|run|save|load)\\s*([0-9]*|[0-z]*\\.txt)?\\s*([0-z]*\\.txt)?\\s*");
+		std::smatch match;
+		char *in = (char*)malloc(sizeof(input.c_str())); //TODO: fix this, it causes weird bugs
+		memcpy(in, input.c_str(), input.length());
+		std::string cmd = match.str(1);
+		if (match.size() > 4)
 		{
-			env = Environment::init(mfile, sfile);
+			return false;
 		}
-		else env = Environment::init();
-		std::cout << env->to_string();
-		return true;
-	}
-	else if (cmd == "run")
-	{
-		std::string count = std::strtok(NULL, " ");
-		if (!count.empty())
+		switch (match.size())
 		{
-			int batch = std::stoi(count);
-			env->step(batch);
+		case 2:
+			if (cmd == "load")
+				env = Environment::init();
+			else if (cmd == "help")
+			{
+				print_help();
+				return true;
+			}
+			else if (cmd == "quit")
+			{
+				exit(0);
+				return true;
+			}
+			else if (cmd == "run")
+			{
+				env->step();
+				std::cout << env->to_string();
+			}
+		break;
+		case 3:
+			if (cmd == "run")
+			{
+				try {
+					int batch = std::atoi(match.str(2).c_str());
+					env->step(batch);
+					std::cout << env->to_string();
+				}
+				catch (...)
+				{
+					return false;
+				}
+			}
+			else if (cmd == "save")
+			{
+				try {
+					std::ofstream save_file{ match.str(2) };
+					save_file << env->to_string();
+				}
+				catch (std::ofstream::failure &e)
+				{
+					std::cout << e.what();
+					return true;
+				}
+			}
+			else
+			{
+				return false;
+			}
+			break;
+		case 4:
+			if (cmd == "load")
+			{
+				try {
+					std::string mfile = match.str(2);
+					std::string sfile = match.str(3);
+					env = Environment::init(mfile, sfile);
+				}
+				catch (std::ifstream::failure &e)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+			break;
+		 default:
+			 return false;
 		}
-		else env->step(1);
-		std::cout << env->to_string();
-		return true;
-
 	}
-	else return false;
+	catch (std::regex_error e)
+	{
+		std::cout << e.what();
+		return false;
+	}
+	return true;
 	
 }
 

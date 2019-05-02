@@ -6,6 +6,7 @@ namespace cppfinal
 
 	void Plant::act()
 	{
+		//TODO: don't regrow if there is an animal at this position
 		if (cooldown > 0)
 		{
 			cooldown--;

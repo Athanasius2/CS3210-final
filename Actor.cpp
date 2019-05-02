@@ -1,4 +1,5 @@
 #include "Actor.hpp"
+#include "Animal.hpp"
 #include "Plant.hpp"
 #include <regex>
 #include <memory>
