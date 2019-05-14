@@ -26,7 +26,8 @@ namespace cppfinal
 		typedef std::shared_ptr<Actor> s_ptr;
 
 		Actor(char t, int nrg, std::pair<int, int> p) : type(t), max_energy(nrg), pos(p), dead(false) {};
-		
+		~Actor();
+
 		//factory method to clear up some problems I was having with shared ptr
 		//Turns out I didn't need to do this, but I spent a long time on it, so we're keeping it for now
 		static std::shared_ptr<Actor> evaluate_species(std::string input, std::shared_ptr<Environment> env);

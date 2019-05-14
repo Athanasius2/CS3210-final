@@ -11,6 +11,12 @@
 namespace cppfinal
 {
 
+	Actor::~Actor()
+	{
+		std::cout << "Destroying actor " << this->gettype() << " at " << this->get_pos().first << "," << this->get_pos().second << std::endl;
+	}
+
+
 	char Actor::print()
 	{
 		return gettype();
@@ -18,8 +24,6 @@ namespace cppfinal
 
 	std::shared_ptr<Actor> Actor::evaluate_species(std::string input, std::shared_ptr<Environment> env) //This initializes the prototype species.  Later they will be coppied into the map
 	{
-		try { //TODO: Make sure there are no duplicate type chars
-			//TODO: this does not actually work
 			std::regex p("\\s*(plant)\\s+([a-z])\\s+([0-9])+\\s+([0-9]+)\\s*");
 			std::regex a("\\s*(omnivore|herbivore)\\s+([A-Z])\\s+\\[(([A-z],\\s*)*[A-z])\\]\\s+([0-9]+)\\s*");
 			std::smatch match;
@@ -49,11 +53,7 @@ namespace cppfinal
 				animal->set_environment(env);
 				return animal;
 			}
-			else throw "Invalid Species: " + input + "\n";
-		}
-		catch (std::regex_error& e) {
-			std::cout << e.what();
-		}
 
+		throw "Invalid Species: " + input + "\n";
 	}
 }
