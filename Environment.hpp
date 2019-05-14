@@ -63,8 +63,15 @@ namespace cppfinal
 		const std::vector<std::vector<char>> &get_map() { return map; }
 		const std::vector<Actor::s_ptr> &get_species() { return species; }
 
-		const posmap &get_adjacent(const std::pair<int, int> &p) const;
-		const std::shared_ptr<Actor> &actor_at(const std::pair<int, int> &pos) const;
+		std::pair<int, int> dimensions() const { 
+			int const rows = this->map.size();
+			return rows > 0
+				? std::pair<int,int>( this->map.front().size(), rows )
+				: std::pair( 0, 0 ); 
+		}
+
+		const posmap get_adjacent(const std::pair<int, int> &p) const;
+		const std::shared_ptr<Actor> actor_at(const std::pair<int, int> &pos) const;
 
 		bool is_obstacle(std::pair<int, int> p) const { 
 			return (map[p.second][p.first] == '#' || map[p.second][p.first] == '~');

@@ -7,6 +7,7 @@
 #include <regex>
 #include <memory>
 #include <cctype>
+#include <cmath>
 
 #include "Environment.hpp"
 #include "Actor.hpp"
@@ -79,14 +80,11 @@ namespace cppfinal
 		std::ifstream mfile{ map_file };
 		if (mfile)
 		{
-			size_t n = 500;	//TODO: manage buffer size better
-			char * s = (char *)malloc(n);
 			int i = 0; //current row (aka Y-axis)
 			do
 			{								
 				std::string line;
-				mfile.getline(s, n);
-				line = s;
+				std::getline(mfile,line);
 				std::vector<char> vline;				//vector line of chars.  Construct the rows as we analyze them for Actor IDs
 				for (unsigned int j = 0; j < line.length(); j++)	//iterate through line of map and check for valid species
 				{
@@ -104,7 +102,7 @@ namespace cppfinal
 							}
 						}
 						if (!exists)
-							throw std::runtime_error("Invalid char: " + line[j]);
+							throw std::runtime_error("Invalid char: " + std::string(1, line[j]));
 
 						vline.push_back(' ');		//push_back a space to replace the Actor ID
 
@@ -112,7 +110,11 @@ namespace cppfinal
 					else vline.push_back(line[j]);	//There was no Actor ID, so I'll push back whatever is in this position;
 				
 				}
-				map.push_back(vline);
+				if (vline.size()) {
+					if ( map.size() && map.front().size() != vline.size() )
+						throw std::runtime_error( "Inconsistent map row length in line " + std::to_string(i) );
+					map.push_back(vline);
+				}
 				i++;								//increment current row
 
 			} 
@@ -181,16 +183,15 @@ namespace cppfinal
 		return sm;
 	}
 
-	const std::shared_ptr<Actor>& Environment::actor_at(const std::pair<int, int>& pos) const
+	const std::shared_ptr<Actor> Environment::actor_at(const std::pair<int, int>& pos) const
 	{
 		std::vector<std::shared_ptr<Actor>> match_x{};
-		std::vector<std::shared_ptr<Actor>> match_y{};
 		std::vector<std::shared_ptr<Actor>> match{};
 
-		std::copy_if(match_x.begin(), match_x.end(), match_y.begin(), [pos](auto x) -> bool {return (x->get_pos().first == pos.first); });
-		std::copy_if(match_y.begin(), match_y.end(), match.begin(), [pos](auto x) -> bool {return (x->get_pos().second == pos.second); });
+		std::copy_if(actors.begin(), actors.end(), std::back_inserter(match_x), [pos](auto x) -> bool {return (x->get_pos().first == pos.first); });
+		std::copy_if(match_x.begin(), match_x.end(), std::back_inserter(match), [pos](auto x) -> bool {return (x->get_pos().second == pos.second); });
 
-		if (match.empty() || match[0]->is_dead() || match[0]->is_eaten())
+		if (match.empty() || !match[0] || match[0]->is_dead() || match[0]->is_eaten())
 			return std::shared_ptr<Actor>(nullptr);
 		else return match[0];
 	}
@@ -224,7 +225,7 @@ namespace cppfinal
 	}
 
 	//TODO: Make this process more efficient
-	const Environment::posmap & Environment::get_adjacent(const std::pair<int, int>& p) const
+	const Environment::posmap Environment::get_adjacent(const std::pair<int, int>& p) const
 	{
 		/*
 		 -1		 +1
